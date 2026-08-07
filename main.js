@@ -1,259 +1,150 @@
-const STORAGE_KEY = 'healthlog.entries.v2';
-
+const STORAGE_KEY = "healthlog.entries.v2";
 
 let entries = JSON.parse(
-  localStorage.getItem(STORAGE_KEY) || '[]'
+  localStorage.getItem(STORAGE_KEY) || "[]"
 );
 
-
-let activeType = 'glucose';
-
+let activeType = "glucose";
 let editingId = null;
-
 let showAllHistory = false;
-
 let toastTimer = null;
 
-let currentMealPhoto = '';
-
-let currentMealPhotoSize = 0;
-
+let currentMealPhoto = "";
 
 
 const medicationOptions = {
 
   losartan: {
-    name: 'Losartan Potassium Tablet',
-    dose: '50 mg',
-    timing: 'Morning',
-    reason: 'Blood pressure',
-    schedule: 'Daily',
+    name: "Losartan Potassium Tablet",
+    dose: "50 mg",
+    timing: "Morning",
+    reason: "Blood pressure",
+    schedule: "Daily",
     expectedDays: [
-      'mon',
-      'tue',
-      'wed',
-      'thu',
-      'fri',
-      'sat',
-      'sun'
+      "mon","tue","wed","thu","fri","sat","sun"
     ]
   },
-
 
   empagliflozin: {
-    name: 'Empagliflozin Tablet',
-    dose: '25 mg',
-    timing: 'Morning',
-    reason: 'Diabetes',
-    schedule: 'Daily',
+    name: "Empagliflozin Tablet",
+    dose: "25 mg",
+    timing: "Morning",
+    reason: "Diabetes",
+    schedule: "Daily",
     expectedDays: [
-      'mon',
-      'tue',
-      'wed',
-      'thu',
-      'fri',
-      'sat',
-      'sun'
+      "mon","tue","wed","thu","fri","sat","sun"
     ]
   },
-
 
   atorvastatin: {
-    name: 'Atorvastatin Tablet',
-    dose: '10 mg',
-    timing: 'Evening',
-    reason: 'Cholesterol',
-    schedule: 'Alternate day',
+    name: "Atorvastatin Tablet",
+    dose: "10 mg",
+    timing: "Evening",
+    reason: "Cholesterol",
+    schedule: "Alternate day",
     expectedDays: [
-      'tue',
-      'thu',
-      'sat'
+      "tue","thu","sat"
     ]
   },
 
-
   metformin: {
-    name:
-      'Metformin HCl XR Extended Release Tablet',
-
-    dose: '2000 mg',
-
-    timing: 'Morning',
-
-    reason: 'Diabetes',
-
-    schedule: 'Daily',
-
+    name: "Metformin HCl XR Extended Release Tablet",
+    dose: "2000 mg",
+    timing: "Morning",
+    reason: "Diabetes",
+    schedule: "Daily",
     expectedDays: [
-      'mon',
-      'tue',
-      'wed',
-      'thu',
-      'fri',
-      'sat',
-      'sun'
+      "mon","tue","wed","thu","fri","sat","sun"
     ]
   }
 
 };
 
 
-
 const days = [
-
-  ['mon', 'Mon'],
-
-  ['tue', 'Tue'],
-
-  ['wed', 'Wed'],
-
-  ['thu', 'Thu'],
-
-  ['fri', 'Fri'],
-
-  ['sat', 'Sat'],
-
-  ['sun', 'Sun']
-
+  ["mon","Mon"],
+  ["tue","Tue"],
+  ["wed","Wed"],
+  ["thu","Thu"],
+  ["fri","Fri"],
+  ["sat","Sat"],
+  ["sun","Sun"]
 ];
-
 
 
 function singaporeParts() {
 
   return Object.fromEntries(
-
     new Intl.DateTimeFormat(
-      'en-GB',
+      "en-GB",
       {
-        timeZone:
-          'Asia/Singapore',
-
-        year:
-          'numeric',
-
-        month:
-          '2-digit',
-
-        day:
-          '2-digit',
-
-        hour:
-          '2-digit',
-
-        minute:
-          '2-digit',
-
-        hourCycle:
-          'h23'
+        timeZone:"Asia/Singapore",
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+        hour:"2-digit",
+        minute:"2-digit",
+        hourCycle:"h23"
       }
     )
-      .formatToParts(
-        new Date()
-      )
+      .formatToParts(new Date())
       .map(
-        ({
-          type,
-          value
-        }) => [
+        ({type,value}) => [
           type,
           value
         ]
       )
-
   );
-
 }
-
 
 
 function todayISO() {
 
-  const p =
-    singaporeParts();
+  const p = singaporeParts();
 
-
-  return (
-    `${p.year}-` +
-    `${p.month}-` +
-    `${p.day}`
-  );
-
+  return `${p.year}-${p.month}-${p.day}`;
 }
-
 
 
 function timeNow() {
 
-  const p =
-    singaporeParts();
+  const p = singaporeParts();
 
-
-  return (
-    `${p.hour}:` +
-    `${p.minute}`
-  );
-
+  return `${p.hour}:${p.minute}`;
 }
 
 
-
-function formatDate(
-  date
-) {
+function formatDate(date) {
 
   return new Intl.DateTimeFormat(
-    'en-SG',
+    "en-SG",
     {
-      weekday:
-        'long',
-
-      day:
-        'numeric',
-
-      month:
-        'long'
+      weekday:"long",
+      day:"numeric",
+      month:"long"
     }
   ).format(
     new Date(
       `${date}T12:00:00`
     )
   );
-
 }
 
 
+function escapeHTML(value) {
 
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ''
-  ).replace(
-    /[&<>'"]/g,
-    (char) => ({
-
-      '&':
-        '&amp;',
-
-      '<':
-        '&lt;',
-
-      '>':
-        '&gt;',
-
-      "'":
-        '&#39;',
-
-      '"':
-        '&quot;'
-
-    }[char])
-  );
-
+  return String(value ?? "")
+    .replace(
+      /[&<>'"]/g,
+      char => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        "'":"&#39;",
+        '"':"&quot;"
+      }[char])
+    );
 }
-
 
 
 function persist() {
@@ -262,56 +153,54 @@ function persist() {
 
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify(
-        entries
-      )
+      JSON.stringify(entries)
     );
 
+    updateBackupCount();
 
     return true;
 
-  } catch (error) {
+  } catch(error) {
 
-    console.error(
-      'HealthLog storage error:',
-      error
-    );
-
+    console.error(error);
 
     showToast(
-      'Storage full — remove some photos or entries'
+      "Storage full — export backup and remove some photos"
     );
 
-
     return false;
-
   }
-
 }
 
 
+function updateBackupCount() {
 
-document.querySelector(
-  '#todayDate'
+  const element =
+    document.getElementById(
+      "backupRecordCount"
+    );
+
+  if(element) {
+    element.textContent =
+      entries.length;
+  }
+}
+
+
+document.getElementById(
+  "todayDate"
 ).textContent =
-  formatDate(
-    todayISO()
-  );
-
+  formatDate(todayISO());
 
 
 const fieldsByType = {
-
 
   glucose: () => `
 
     <div class="value-row two">
 
       <label class="field">
-
-        <span>
-          Blood glucose
-        </span>
+        <span>Blood glucose</span>
 
         <input
           name="glucose"
@@ -323,57 +212,29 @@ const fieldsByType = {
           placeholder="5.6"
           required
         >
-
       </label>
 
-
       <label class="field">
+        <span>Timing</span>
 
-        <span>
-          Timing
-        </span>
-
-        <select
-          name="context"
-        >
-
-          <option>
-            Before meal
-          </option>
-
-          <option>
-            After meal
-          </option>
-
-          <option>
-            Fasting
-          </option>
-
-          <option>
-            Bedtime
-          </option>
-
-          <option>
-            Other
-          </option>
-
+        <select name="context">
+          <option>Before meal</option>
+          <option>After meal</option>
+          <option>Fasting</option>
+          <option>Bedtime</option>
+          <option>Other</option>
         </select>
-
       </label>
 
     </div>
-
   `,
-
 
 
   meal: () => `
 
     <label class="field">
 
-      <span>
-        What did you eat?
-      </span>
+      <span>What did you eat?</span>
 
       <textarea
         name="food"
@@ -388,39 +249,28 @@ const fieldsByType = {
     <div class="meal-chips">
 
       ${[
-        'Breakfast',
-        'Lunch',
-        'Dinner',
-        'Snack'
-      ]
-        .map(
-          (
-            meal,
-            index
-          ) => `
+        "Breakfast",
+        "Lunch",
+        "Dinner",
+        "Snack"
+      ].map(
+        (meal,index) => `
 
-            <label>
+          <label>
 
-              <input
-                type="radio"
-                name="mealType"
-                value="${meal}"
-                ${
-                  index === 0
-                    ? 'checked'
-                    : ''
-                }
-              >
+            <input
+              type="radio"
+              name="mealType"
+              value="${meal}"
+              ${index === 0 ? "checked" : ""}
+            >
 
-              <span>
-                ${meal}
-              </span>
+            <span>${meal}</span>
 
-            </label>
+          </label>
 
-          `
-        )
-        .join('')}
+        `
+      ).join("")}
 
     </div>
 
@@ -466,10 +316,7 @@ const fieldsByType = {
 
 
       <small class="photo-note">
-
-        Photos are compressed before
-        being saved to reduce storage.
-
+        Photos are compressed before saving.
       </small>
 
 
@@ -479,18 +326,14 @@ const fieldsByType = {
       ></div>
 
     </div>
-
   `,
-
 
 
   medication: () => `
 
     <label class="field">
 
-      <span>
-        Medication
-      </span>
+      <span>Medication</span>
 
       <select
         id="medicationSelect"
@@ -524,17 +367,12 @@ const fieldsByType = {
       <div
         class="med-name"
         id="medName"
-      >
-        Losartan Potassium Tablet
-      </div>
-
+      ></div>
 
       <div
         class="med-dose"
         id="medDose"
-      >
-        50 mg · Morning · Daily
-      </div>
+      ></div>
 
 
       <span class="weekly-title">
@@ -544,46 +382,34 @@ const fieldsByType = {
 
       <div class="weekly-days">
 
-        ${days
-          .map(
-            ([
-              value,
-              label
-            ]) => `
+        ${days.map(
+          ([value,label]) => `
 
-              <label
-                class="weekly-day"
-                data-day="${value}"
+            <label
+              class="weekly-day"
+              data-day="${value}"
+            >
+
+              <input
+                type="checkbox"
+                name="medWeekDays"
+                value="${value}"
               >
 
-                <input
-                  type="checkbox"
-                  name="medWeekDays"
-                  value="${value}"
-                >
+              <span>${label}</span>
 
-                <span>
-                  ${label}
-                </span>
+            </label>
 
-              </label>
-
-            `
-          )
-          .join('')}
+          `
+        ).join("")}
 
       </div>
 
 
       <small
-        class="weekly-hint"
         id="weeklyHint"
-      >
-
-        Tick the days you have taken
-        this medicine.
-
-      </small>
+        class="weekly-hint"
+      ></small>
 
     </div>
 
@@ -592,30 +418,13 @@ const fieldsByType = {
 
       <label class="field">
 
-        <span>
-          Status
-        </span>
+        <span>Status</span>
 
-        <select
-          name="medStatus"
-        >
-
-          <option>
-            Taken
-          </option>
-
-          <option>
-            Missed
-          </option>
-
-          <option>
-            Delayed
-          </option>
-
-          <option>
-            Skipped by doctor advice
-          </option>
-
+        <select name="medStatus">
+          <option>Taken</option>
+          <option>Missed</option>
+          <option>Delayed</option>
+          <option>Skipped by doctor advice</option>
         </select>
 
       </label>
@@ -623,15 +432,11 @@ const fieldsByType = {
 
       <label class="field">
 
-        <span>
-          Timing
-        </span>
+        <span>Timing</span>
 
         <input
           id="medTiming"
           name="medTiming"
-          type="text"
-          value="Morning"
           readonly
         >
 
@@ -642,9 +447,7 @@ const fieldsByType = {
 
     <label class="field">
 
-      <span>
-        Remarks
-      </span>
+      <span>Remarks</span>
 
       <textarea
         name="medRemarks"
@@ -653,9 +456,7 @@ const fieldsByType = {
       ></textarea>
 
     </label>
-
   `,
-
 
 
   pressure: () => `
@@ -664,14 +465,11 @@ const fieldsByType = {
 
       <label class="field">
 
-        <span>
-          Systolic
-        </span>
+        <span>Systolic</span>
 
         <input
           name="systolic"
           type="number"
-          inputmode="numeric"
           min="50"
           max="260"
           placeholder="120"
@@ -683,14 +481,11 @@ const fieldsByType = {
 
       <label class="field">
 
-        <span>
-          Diastolic
-        </span>
+        <span>Diastolic</span>
 
         <input
           name="diastolic"
           type="number"
-          inputmode="numeric"
           min="30"
           max="160"
           placeholder="80"
@@ -704,374 +499,308 @@ const fieldsByType = {
 
     <label class="field">
 
-      <span>
-        Pulse
-      </span>
+      <span>Pulse</span>
 
       <input
         name="pulse"
         type="number"
-        inputmode="numeric"
         min="25"
         max="250"
         placeholder="72"
       >
 
     </label>
-
   `
-
 };
-
 
 
 function updateForm() {
 
-  const fields =
-    document.querySelector(
-      '#dynamicFields'
-    );
+  document.getElementById(
+    "dynamicFields"
+  ).innerHTML =
+    fieldsByType[activeType]();
 
 
-  fields.innerHTML =
-    fieldsByType[
-      activeType
-    ]();
-
-
-  document.querySelector(
-    '#logTime'
+  document.getElementById(
+    "logTime"
   ).value =
     timeNow();
 
 
-  document.querySelector(
-    '#logDate'
+  document.getElementById(
+    "logDate"
   ).value =
     todayISO();
 
 
   const labels = {
-
-    glucose:
-      'Log blood glucose',
-
-    meal:
-      'Log food & meal',
-
-    medication:
-      'Log medication',
-
-    pressure:
-      'Log blood pressure'
-
+    glucose:"Log blood glucose",
+    meal:"Log food & meal",
+    medication:"Log medication",
+    pressure:"Log blood pressure"
   };
 
 
-  document.querySelector(
-    '#submitLabel'
+  document.getElementById(
+    "submitLabel"
   ).textContent =
     editingId
-      ? 'Save changes'
-      : labels[
-          activeType
-        ];
+      ? "Save changes"
+      : labels[activeType];
 
 
-  document.querySelector(
-    '#cancelEdit'
+  document.getElementById(
+    "cancelEdit"
   ).classList.toggle(
-    'show',
-    Boolean(
-      editingId
-    )
+    "show",
+    Boolean(editingId)
   );
 
 
-  if (
-    activeType ===
-    'medication'
-  ) {
-
+  if(activeType === "medication") {
     setupMedicationSelect();
-
   }
 
 
-  if (
-    activeType ===
-    'meal'
-  ) {
-
+  if(activeType === "meal") {
     setupMealPhoto();
-
   }
-
 }
-
 
 
 function setupMedicationSelect() {
 
   const select =
-    document.querySelector(
-      '#medicationSelect'
+    document.getElementById(
+      "medicationSelect"
     );
 
 
-  if (!select) {
-    return;
-  }
+  const update = () => {
+
+    const med =
+      medicationOptions[
+        select.value
+      ];
 
 
-  const updateMedication =
-    () => {
-
-      const medication =
-        medicationOptions[
-          select.value
-        ];
+    document.getElementById(
+      "medName"
+    ).textContent =
+      med.name;
 
 
-      if (!medication) {
-        return;
-      }
+    document.getElementById(
+      "medDose"
+    ).textContent =
+      `${med.dose} · ${med.timing} · ${med.schedule}`;
 
 
-      document.querySelector(
-        '#medName'
-      ).textContent =
-        medication.name;
+    document.getElementById(
+      "medTiming"
+    ).value =
+      med.timing;
 
 
-      document.querySelector(
-        '#medDose'
-      ).textContent =
-        (
-          `${medication.dose} · ` +
-          `${medication.timing} · ` +
-          `${medication.schedule}`
+    document.querySelectorAll(
+      ".weekly-day"
+    ).forEach(
+      label => {
+
+        label.classList.toggle(
+          "expected",
+          med.expectedDays.includes(
+            label.dataset.day
+          )
         );
-
-
-      document.querySelector(
-        '#medTiming'
-      ).value =
-        medication.timing;
-
-
-      document.querySelectorAll(
-        '.weekly-day'
-      ).forEach(
-        (
-          label
-        ) => {
-
-          label.classList.toggle(
-            'expected',
-            medication
-              .expectedDays
-              .includes(
-                label.dataset.day
-              )
-          );
-
-        }
-      );
-
-
-      const hint =
-        document.querySelector(
-          '#weeklyHint'
-        );
-
-
-      if (
-        select.value ===
-        'atorvastatin'
-      ) {
-
-        hint.textContent =
-          (
-            'Atorvastatin alternate-day plan ' +
-            'for this week: Tue / Thu / Sat. ' +
-            'Tick the days actually taken.'
-          );
-
-      } else {
-
-        hint.textContent =
-          (
-            'Daily medicine. Tick the days ' +
-            'you have actually taken it.'
-          );
-
       }
+    );
 
-    };
+
+    document.getElementById(
+      "weeklyHint"
+    ).textContent =
+      select.value === "atorvastatin"
+        ? "Atorvastatin planned days this week: Tue / Thu / Sat. Tick the days actually taken."
+        : "Daily medicine. Tick the days actually taken.";
+  };
 
 
   select.addEventListener(
-    'change',
-    updateMedication
+    "change",
+    update
   );
 
 
-  updateMedication();
-
+  update();
 }
-
 
 
 function setupMealPhoto() {
 
   const camera =
-    document.querySelector(
-      '#mealCamera'
+    document.getElementById(
+      "mealCamera"
     );
-
 
   const library =
-    document.querySelector(
-      '#mealLibrary'
+    document.getElementById(
+      "mealLibrary"
     );
-
-
-  if (
-    !camera ||
-    !library
-  ) {
-    return;
-  }
 
 
   const handler =
-    async (
-      event
-    ) => {
+    async event => {
 
       const file =
-        event.target
-          .files?.[0];
+        event.target.files?.[0];
 
-
-      if (!file) {
-        return;
-      }
-
-
-      if (
-        !file.type
-          .startsWith(
-            'image/'
-          )
-      ) {
-
-        showToast(
-          'Please select an image'
-        );
-
-        return;
-      }
-
-
-      showToast(
-        'Preparing photo…'
-      );
+      if(!file) return;
 
 
       try {
 
-        const result =
-          await compressImage(
-            file
-          );
-
+        showToast(
+          "Preparing photo…"
+        );
 
         currentMealPhoto =
-          result.dataUrl;
-
-
-        currentMealPhotoSize =
-          result.bytes;
-
+          await resizePhoto(file);
 
         renderMealPhotoPreview();
 
+        showToast(
+          "Photo ready"
+        );
+
+      } catch(error) {
+
+        console.error(error);
 
         showToast(
-          'Photo ready'
+          "Could not process photo"
         );
-
-      } catch (
-        error
-      ) {
-
-        console.error(
-          error
-        );
-
-
-        showToast(
-          'Could not process photo'
-        );
-
       }
 
-
-      event.target.value =
-        '';
-
+      event.target.value = "";
     };
 
 
   camera.addEventListener(
-    'change',
+    "change",
     handler
   );
 
-
   library.addEventListener(
-    'change',
+    "change",
     handler
   );
 
 
   renderMealPhotoPreview();
-
 }
 
+
+function resizePhoto(file) {
+
+  return new Promise(
+    resolve => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        event => {
+
+          const img =
+            new Image();
+
+
+          img.onload =
+            () => {
+
+              const maxWidth =
+                1200;
+
+
+              const scale =
+                Math.min(
+                  1,
+                  maxWidth / img.width
+                );
+
+
+              const canvas =
+                document.createElement(
+                  "canvas"
+                );
+
+
+              canvas.width =
+                Math.round(
+                  img.width * scale
+                );
+
+
+              canvas.height =
+                Math.round(
+                  img.height * scale
+                );
+
+
+              const ctx =
+                canvas.getContext(
+                  "2d"
+                );
+
+
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+              );
+
+
+              resolve(
+                canvas.toDataURL(
+                  "image/jpeg",
+                  .75
+                )
+              );
+            };
+
+
+          img.src =
+            event.target.result;
+        };
+
+
+      reader.readAsDataURL(file);
+    }
+  );
+}
 
 
 function renderMealPhotoPreview() {
 
   const preview =
-    document.querySelector(
-      '#mealPhotoPreview'
+    document.getElementById(
+      "mealPhotoPreview"
     );
 
 
-  if (!preview) {
+  if(!preview) return;
+
+
+  if(!currentMealPhoto) {
+
+    preview.innerHTML = "";
     return;
   }
-
-
-  if (
-    !currentMealPhoto
-  ) {
-
-    preview.innerHTML =
-      '';
-
-    return;
-  }
-
-
-  const kb =
-    Math.round(
-      currentMealPhotoSize /
-      1024
-    );
 
 
   preview.innerHTML = `
@@ -1080,18 +809,8 @@ function renderMealPhotoPreview() {
 
       <img
         src="${currentMealPhoto}"
-        alt="Meal preview"
+        alt="Meal photo"
       >
-
-      ${
-        currentMealPhotoSize
-          ? `
-            <small class="photo-size-label">
-              Compressed photo: about ${kb} KB
-            </small>
-          `
-          : ''
-      }
 
       <button
         id="removeMealPhoto"
@@ -1102,245 +821,66 @@ function renderMealPhotoPreview() {
       </button>
 
     </div>
-
   `;
 
 
-  document.querySelector(
-    '#removeMealPhoto'
-  )?.addEventListener(
-    'click',
+  document.getElementById(
+    "removeMealPhoto"
+  ).addEventListener(
+    "click",
     () => {
 
-      currentMealPhoto =
-        '';
-
-      currentMealPhotoSize =
-        0;
-
+      currentMealPhoto = "";
       renderMealPhotoPreview();
-
     }
   );
-
 }
-
-
-
-function compressImage(
-  file
-) {
-
-  return new Promise(
-    (
-      resolve,
-      reject
-    ) => {
-
-      const reader =
-        new FileReader();
-
-
-      reader.onerror =
-        reject;
-
-
-      reader.onload =
-        () => {
-
-          const image =
-            new Image();
-
-
-          image.onerror =
-            reject;
-
-
-          image.onload =
-            () => {
-
-              const maxDimension =
-                900;
-
-
-              let width =
-                image.width;
-
-
-              let height =
-                image.height;
-
-
-              if (
-                width >
-                maxDimension ||
-                height >
-                maxDimension
-              ) {
-
-                const scale =
-                  Math.min(
-                    maxDimension /
-                      width,
-
-                    maxDimension /
-                      height
-                  );
-
-
-                width =
-                  Math.round(
-                    width *
-                    scale
-                  );
-
-
-                height =
-                  Math.round(
-                    height *
-                    scale
-                  );
-
-              }
-
-
-              const canvas =
-                document.createElement(
-                  'canvas'
-                );
-
-
-              canvas.width =
-                width;
-
-
-              canvas.height =
-                height;
-
-
-              const ctx =
-                canvas.getContext(
-                  '2d'
-                );
-
-
-              ctx.drawImage(
-                image,
-                0,
-                0,
-                width,
-                height
-              );
-
-
-              const dataUrl =
-                canvas.toDataURL(
-                  'image/jpeg',
-                  0.72
-                );
-
-
-              const bytes =
-                Math.round(
-                  (
-                    dataUrl.length -
-                    dataUrl.indexOf(
-                      ','
-                    ) -
-                    1
-                  ) *
-                  0.75
-                );
-
-
-              resolve({
-                dataUrl,
-                bytes
-              });
-
-            };
-
-
-          image.src =
-            reader.result;
-
-        };
-
-
-      reader.readAsDataURL(
-        file
-      );
-
-    }
-  );
-
-}
-
 
 
 document.querySelectorAll(
-  '.type-tab'
+  ".type-tab"
 ).forEach(
-  (
-    tab
-  ) => {
+  tab => {
 
     tab.addEventListener(
-      'click',
+      "click",
       () => {
 
-        if (
-          editingId
-        ) {
-          return;
-        }
+        if(editingId) return;
 
 
         activeType =
           tab.dataset.type;
 
 
-        currentMealPhoto =
-          '';
-
-        currentMealPhotoSize =
-          0;
+        currentMealPhoto = "";
 
 
         document.querySelectorAll(
-          '.type-tab'
+          ".type-tab"
         ).forEach(
-          (
-            item
-          ) => {
+          item => {
 
             item.classList.toggle(
-              'active',
-              item ===
-              tab
+              "active",
+              item === tab
             );
-
           }
         );
 
 
         updateForm();
-
       }
     );
-
   }
 );
 
 
-
-document.querySelector(
-  '#logForm'
+document.getElementById(
+  "logForm"
 ).addEventListener(
-  'submit',
-  (
-    event
-  ) => {
+  "submit",
+  event => {
 
     event.preventDefault();
 
@@ -1357,65 +897,45 @@ document.querySelector(
       );
 
 
-    if (
-      activeType ===
-      'meal'
-    ) {
+    if(activeType === "meal") {
 
       data.photo =
-        currentMealPhoto ||
-        '';
-
-      data.photoBytes =
-        currentMealPhotoSize ||
-        0;
-
+        currentMealPhoto || "";
     }
 
 
-    if (
-      activeType ===
-      'medication'
-    ) {
+    if(activeType === "medication") {
 
       data.medWeekDays =
         formData.getAll(
-          'medWeekDays'
+          "medWeekDays"
         );
 
 
-      const medication =
+      const med =
         medicationOptions[
           data.medicationKey
         ];
 
 
       data.medicationName =
-        medication.name;
-
+        med.name;
 
       data.dose =
-        medication.dose;
-
+        med.dose;
 
       data.medReason =
-        medication.reason;
-
+        med.reason;
 
       data.medSchedule =
-        medication.schedule;
-
+        med.schedule;
     }
 
 
     const existing =
       editingId
         ? entries.find(
-            (
-              entry
-            ) =>
-              entry.id ===
-              editingId
+            e => e.id === editingId
           )
         : null;
 
@@ -1431,437 +951,228 @@ document.querySelector(
 
       createdAt:
         existing?.createdAt ||
-        new Date()
-          .toISOString(),
+        new Date().toISOString(),
 
       ...data
-
     };
 
 
-    const previousEntries =
-      [
-        ...entries
-      ];
-
-
-    if (
-      editingId
-    ) {
+    if(editingId) {
 
       entries =
         entries.map(
-          (
-            item
-          ) =>
-            item.id ===
-            editingId
+          item =>
+            item.id === editingId
               ? entry
               : item
         );
 
     } else {
 
-      entries.push(
-        entry
-      );
-
+      entries.push(entry);
     }
 
 
     const wasEditing =
-      Boolean(
-        editingId
-      );
+      Boolean(editingId);
 
 
-    if (
-      !persist()
-    ) {
-
-      entries =
-        previousEntries;
-
-      return;
-    }
+    editingId = null;
+    currentMealPhoto = "";
 
 
-    editingId =
-      null;
-
-
-    currentMealPhoto =
-      '';
-
-    currentMealPhotoSize =
-      0;
-
-
+    persist();
     renderTimeline();
-
     updateForm();
 
 
     showToast(
       wasEditing
-        ? 'Changes saved'
-        : 'Entry saved'
+        ? "Changes saved"
+        : "Entry saved"
     );
-
   }
 );
 
 
-
 function renderTimeline() {
 
-  const sortedEntries =
-    [
-      ...entries
-    ].sort(
-      (
-        a,
-        b
-      ) =>
-        (
-          `${b.date} ${b.time}`
-        ).localeCompare(
-          `${a.date} ${a.time}`
-        )
+  const sorted =
+    [...entries].sort(
+      (a,b) =>
+        `${b.date} ${b.time}`
+          .localeCompare(
+            `${a.date} ${a.time}`
+          )
     );
+
+
+  document.getElementById(
+    "entryBadge"
+  ).textContent =
+    sorted.length;
 
 
   const todays =
-    sortedEntries.filter(
-      (
-        entry
-      ) =>
-        entry.date ===
-        todayISO()
+    sorted.filter(
+      e => e.date === todayISO()
     );
 
 
-  document.querySelector(
-    '#entryBadge'
+  document.getElementById(
+    "todayCount"
   ).textContent =
-    sortedEntries.length;
+    `${todays.length} ${
+      todays.length === 1
+        ? "entry"
+        : "entries"
+    } logged`;
 
 
-  document.querySelector(
-    '#todayCount'
-  ).textContent =
-    (
-      `${todays.length} ` +
-      `${
-        todays.length === 1
-          ? 'entry'
-          : 'entries'
-      } logged`
-    );
+  updateBackupCount();
 
-
-  renderSummary(
-    sortedEntries
-  );
+  renderSummary(sorted);
 
 
   const timeline =
-    document.querySelector(
-      '#timeline'
+    document.getElementById(
+      "timeline"
     );
 
 
-  if (
-    !sortedEntries.length
-  ) {
+  if(!sorted.length) {
 
     timeline.innerHTML = `
 
       <div class="empty-state">
 
-        <h3>
-          Your day starts here
-        </h3>
+        <h3>Your day starts here</h3>
 
         <p>
-          Log a reading, meal or
-          medication and it will
-          appear here.
+          Log a reading, meal or medication
+          and it will appear here.
         </p>
 
       </div>
-
     `;
 
-
     return;
-
   }
 
 
   const visible =
     showAllHistory
-      ? sortedEntries
-      : sortedEntries.slice(
-          0,
-          10
-        );
+      ? sorted
+      : sorted.slice(0,10);
 
 
   timeline.innerHTML = `
 
-    <div class="timeline-list">
-
-      ${visible
-        .map(
-          renderTimelineItem
-        )
-        .join('')}
-
-    </div>
-
+    ${visible.map(
+      renderTimelineItem
+    ).join("")}
 
     ${
-      sortedEntries.length >
-      10
-
+      sorted.length > 10
         ? `
-
           <button
             class="show-history-btn"
             type="button"
           >
-
             ${
               showAllHistory
-                ? 'Show recent only'
-                : (
-                    `Show all ` +
-                    `${sortedEntries.length} entries`
-                  )
+                ? "Show recent only"
+                : `Show all ${sorted.length} entries`
             }
-
           </button>
-
         `
-
-        : ''
+        : ""
     }
-
   `;
-
 }
 
 
+function renderTimelineItem(entry) {
 
-function renderTimelineItem(
-  entry
-) {
-
-  const day =
-    entry.date ===
-    todayISO()
-
-      ? 'Today'
-
-      : new Intl.DateTimeFormat(
-          'en-SG',
-          {
-            day:
-              'numeric',
-
-            month:
-              'short'
-          }
-        ).format(
-          new Date(
-            `${entry.date}T12:00:00`
-          )
-        );
+  let title = "";
+  let subtitle = "";
+  let icon = "";
+  let photo = "";
 
 
-  let title =
-    '';
-
-  let subtitle =
-    '';
-
-  let icon =
-    '';
-
-  let extra =
-    '';
-
-
-  if (
-    entry.type ===
-    'glucose'
-  ) {
+  if(entry.type === "glucose") {
 
     title =
-      (
-        `${escapeHTML(
-          entry.glucose
-        )} mmol/L`
-      );
-
+      `${escapeHTML(entry.glucose)} mmol/L`;
 
     subtitle =
-      escapeHTML(
-        entry.context
-      );
+      escapeHTML(entry.context);
 
-
-    icon =
-      '●';
-
+    icon = "●";
   }
 
 
-
-  if (
-    entry.type ===
-    'meal'
-  ) {
+  if(entry.type === "meal") {
 
     title =
-      escapeHTML(
-        entry.food
-      );
-
+      escapeHTML(entry.food);
 
     subtitle =
-      escapeHTML(
-        entry.mealType
-      );
+      escapeHTML(entry.mealType);
+
+    icon = "🍽";
 
 
-    icon =
-      '🍽';
+    if(entry.photo) {
 
-
-    if (
-      entry.photo
-    ) {
-
-      extra = `
-
+      photo = `
         <img
           class="timeline-meal-photo"
           src="${entry.photo}"
           alt="Meal photo"
-          loading="lazy"
         >
-
       `;
-
     }
-
   }
 
 
-
-  if (
-    entry.type ===
-    'pressure'
-  ) {
+  if(entry.type === "pressure") {
 
     title =
-      (
-        `${escapeHTML(
-          entry.systolic
-        )}/` +
-        `${escapeHTML(
-          entry.diastolic
-        )} mmHg`
-      );
-
+      `${escapeHTML(entry.systolic)}/${escapeHTML(entry.diastolic)} mmHg`;
 
     subtitle =
       entry.pulse
+        ? `Pulse ${escapeHTML(entry.pulse)} bpm`
+        : "Blood pressure";
 
-        ? (
-            `Pulse ` +
-            `${escapeHTML(
-              entry.pulse
-            )} bpm`
-          )
-
-        : 'Blood pressure';
-
-
-    icon =
-      '♥';
-
+    icon = "♥";
   }
 
 
-
-  if (
-    entry.type ===
-    'medication'
-  ) {
-
-    const checkedDays =
-      Array.isArray(
-        entry.medWeekDays
-      )
-
-        ? entry.medWeekDays
-            .map(
-              (
-                d
-              ) =>
-                d.toUpperCase()
-            )
-            .join(
-              ', '
-            )
-
-        : '';
-
+  if(entry.type === "medication") {
 
     title =
-      (
-        `${escapeHTML(
-          entry.medicationName
-        )} · ` +
-        `${escapeHTML(
-          entry.dose
-        )}`
-      );
+      `${escapeHTML(entry.medicationName)} · ${escapeHTML(entry.dose)}`;
+
+    const daysText =
+      Array.isArray(entry.medWeekDays)
+        ? entry.medWeekDays
+            .map(x => x.toUpperCase())
+            .join(", ")
+        : "";
 
 
     subtitle =
+      `${escapeHTML(entry.medStatus || "Taken")} · ${escapeHTML(entry.medSchedule || "")}` +
       (
-        `${escapeHTML(
-          entry.medStatus ||
-          'Taken'
-        )} · ` +
-
-        `${escapeHTML(
-          entry.medSchedule ||
-          ''
-        )}` +
-
-        (
-          checkedDays
-            ? (
-                ` · Checked: ` +
-                `${escapeHTML(
-                  checkedDays
-                )}`
-              )
-            : ''
-        )
+        daysText
+          ? ` · ${escapeHTML(daysText)}`
+          : ""
       );
 
-
-    icon =
-      '💊';
-
+    icon = "💊";
   }
-
 
 
   return `
@@ -1871,38 +1182,28 @@ function renderTimelineItem(
     >
 
       <div class="timeline-time">
-
-        ${escapeHTML(
-          entry.time
-        )}
+        ${escapeHTML(entry.time)}
 
         <small>
-          ${day}
+          ${escapeHTML(entry.date)}
         </small>
-
       </div>
 
 
       <div
         class="item-icon ${entry.type}"
       >
-
         ${icon}
-
       </div>
 
 
       <div class="item-body">
 
-        <b>
-          ${title}
-        </b>
+        <b>${title}</b>
 
-        <span>
-          ${subtitle}
-        </span>
+        <span>${subtitle}</span>
 
-        ${extra}
+        ${photo}
 
       </div>
 
@@ -1913,17 +1214,14 @@ function renderTimelineItem(
           class="edit-btn"
           data-id="${entry.id}"
           type="button"
-          title="Edit"
         >
           ✎
         </button>
-
 
         <button
           class="delete-btn"
           data-id="${entry.id}"
           type="button"
-          title="Delete"
         >
           🗑
         </button>
@@ -1931,527 +1229,228 @@ function renderTimelineItem(
       </div>
 
     </article>
-
   `;
-
 }
 
 
+function renderSummary(sorted) {
 
-function renderSummary(
-  sortedEntries
-) {
-
-  const glucoseEntries =
-    sortedEntries.filter(
-      (
-        entry
-      ) =>
-        entry.type ===
-          'glucose' &&
-
+  const glucose =
+    sorted.filter(
+      e =>
+        e.type === "glucose" &&
         Number.isFinite(
-          Number(
-            entry.glucose
-          )
+          Number(e.glucose)
         )
-    );
-
-
-  const todayGlucose =
-    glucoseEntries.filter(
-      (
-        entry
-      ) =>
-        entry.date ===
-        todayISO()
     );
 
 
   const latestGlucose =
-    glucoseEntries[0]
-      ?.glucose ||
-    '—';
+    glucose[0]?.glucose || "—";
 
 
-  const latestPressure =
-    sortedEntries.find(
-      (
-        entry
-      ) =>
-        entry.type ===
-        'pressure'
+  const pressure =
+    sorted.find(
+      e => e.type === "pressure"
     );
 
 
-  const todayMeals =
-    sortedEntries.filter(
-      (
-        entry
-      ) =>
-        (
-          entry.type ===
-          'meal'
-        ) &&
-        (
-          entry.date ===
-          todayISO()
-        )
+  const mealsToday =
+    sorted.filter(
+      e =>
+        e.type === "meal" &&
+        e.date === todayISO()
     );
 
 
-  const todayMedication =
-    sortedEntries.filter(
-      (
-        entry
-      ) =>
-        (
-          entry.type ===
-          'medication'
-        ) &&
-        (
-          entry.date ===
-          todayISO()
-        )
+  const medsToday =
+    sorted.filter(
+      e =>
+        e.type === "medication" &&
+        e.date === todayISO()
     );
 
 
-  const todayEntries =
-    sortedEntries.filter(
-      (
-        entry
-      ) =>
-        entry.date ===
-        todayISO()
-    );
-
-
-  const range =
-    todayGlucose.length
-
-      ? (
-          `${Math.min(
-            ...todayGlucose.map(
-              (
-                entry
-              ) =>
-                Number(
-                  entry.glucose
-                )
-            )
-          ).toFixed(1)}–` +
-
-          `${Math.max(
-            ...todayGlucose.map(
-              (
-                entry
-              ) =>
-                Number(
-                  entry.glucose
-                )
-            )
-          ).toFixed(1)}`
-        )
-
-      : '—';
-
-
-  document.querySelector(
-    '#summaryGrid'
+  document.getElementById(
+    "summaryGrid"
   ).innerHTML = `
 
-    <div
-      class="summary-item glucose"
-    >
+    <div class="summary-item glucose">
 
-      <span>
-        Latest glucose
-      </span>
+      <span>Latest glucose</span>
 
       <strong>
-        ${escapeHTML(
-          latestGlucose
-        )}
+        ${escapeHTML(latestGlucose)}
       </strong>
 
       <small>
         ${
-          latestGlucose ===
-          '—'
-            ? 'No readings'
-            : 'mmol/L'
+          latestGlucose === "—"
+            ? "No reading"
+            : "mmol/L"
         }
       </small>
 
     </div>
 
 
-    <div
-      class="summary-item pressure"
-    >
+    <div class="summary-item pressure">
 
-      <span>
-        Latest pressure
-      </span>
+      <span>Latest pressure</span>
 
       <strong>
-
         ${
-          latestPressure
-
-            ? (
-                `${escapeHTML(
-                  latestPressure.systolic
-                )}/` +
-
-                `${escapeHTML(
-                  latestPressure.diastolic
-                )}`
-              )
-
-            : '—'
+          pressure
+            ? `${pressure.systolic}/${pressure.diastolic}`
+            : "—"
         }
-
       </strong>
 
       <small>
-
         ${
-          latestPressure
-            ? 'mmHg'
-            : 'No reading'
+          pressure
+            ? "mmHg"
+            : "No reading"
         }
-
       </small>
 
     </div>
 
 
-    <div
-      class="summary-item glucose"
-    >
+    <div class="summary-item full food">
 
-      <span>
-        Today's glucose range
-      </span>
-
-      <strong>
-        ${range}
-      </strong>
+      <span>Today's food</span>
 
       <small>
-
         ${
-          range === '—'
-            ? 'No readings'
-            : 'mmol/L'
+          mealsToday.length
+            ? `${mealsToday.length} meal records`
+            : "No food logged today"
         }
-
       </small>
 
     </div>
 
 
-    <div class="summary-item">
+    <div class="summary-item full medication">
 
-      <span>
-        Today's entries
-      </span>
-
-      <strong>
-        ${todayEntries.length}
-      </strong>
+      <span>Today's medication</span>
 
       <small>
-        Total logs
+        ${
+          medsToday.length
+            ? `${medsToday.length} medication records`
+            : "No medication logged today"
+        }
       </small>
 
     </div>
-
-
-    <div
-      class="summary-item full food"
-    >
-
-      <span>
-        Today's food
-      </span>
-
-
-      ${
-        todayMeals.length
-
-          ? todayMeals
-              .map(
-                (
-                  entry
-                ) => `
-
-                  <small>
-
-                    ${escapeHTML(
-                      entry.time
-                    )}
-                    ·
-                    ${escapeHTML(
-                      entry.mealType
-                    )}
-                    ·
-                    ${escapeHTML(
-                      entry.food
-                    )}
-
-                    ${
-                      entry.photo
-                        ? ' · 📷'
-                        : ''
-                    }
-
-                  </small>
-
-                `
-              )
-              .join('')
-
-          : `
-
-              <small>
-                No food logged today
-              </small>
-
-            `
-      }
-
-    </div>
-
-
-    <div
-      class="summary-item full medication"
-    >
-
-      <span>
-        Today's medication
-      </span>
-
-
-      ${
-        todayMedication.length
-
-          ? todayMedication
-              .map(
-                (
-                  entry
-                ) => `
-
-                  <small>
-
-                    ${escapeHTML(
-                      entry.time
-                    )}
-                    ·
-                    ${escapeHTML(
-                      entry.medicationName
-                    )}
-                    ·
-                    ${escapeHTML(
-                      entry.dose
-                    )}
-                    ·
-                    ${escapeHTML(
-                      entry.medStatus ||
-                      'Taken'
-                    )}
-
-                  </small>
-
-                `
-              )
-              .join('')
-
-          : `
-
-              <small>
-                No medication logged today
-              </small>
-
-            `
-      }
-
-    </div>
-
   `;
-
 }
 
 
-
-document.querySelector(
-  '#timeline'
+document.getElementById(
+  "timeline"
 ).addEventListener(
-  'click',
-  (
-    event
-  ) => {
+  "click",
+  event => {
 
-    const editButton =
+    const edit =
       event.target.closest(
-        '.edit-btn'
+        ".edit-btn"
+      );
+
+    const remove =
+      event.target.closest(
+        ".delete-btn"
+      );
+
+    const show =
+      event.target.closest(
+        ".show-history-btn"
       );
 
 
-    const deleteButton =
-      event.target.closest(
-        '.delete-btn'
-      );
-
-
-    const showButton =
-      event.target.closest(
-        '.show-history-btn'
-      );
-
-
-    if (
-      showButton
-    ) {
+    if(show) {
 
       showAllHistory =
         !showAllHistory;
 
-
       renderTimeline();
 
       return;
-
     }
 
 
-    if (
-      editButton
-    ) {
+    if(edit) {
 
       startEditing(
-        editButton.dataset.id
+        edit.dataset.id
       );
 
       return;
-
     }
 
 
-    if (
-      deleteButton
-    ) {
+    if(remove) {
 
-      const id =
-        deleteButton.dataset.id;
-
-
-      const confirmed =
-        confirm(
-          'Delete this entry?'
-        );
-
-
-      if (
-        !confirmed
-      ) {
-        return;
-      }
+      if(
+        !confirm(
+          "Delete this entry?"
+        )
+      ) return;
 
 
       entries =
         entries.filter(
-          (
-            entry
-          ) =>
-            entry.id !==
-            id
+          e =>
+            e.id !==
+            remove.dataset.id
         );
 
 
       persist();
-
       renderTimeline();
 
-
       showToast(
-        'Entry deleted'
+        "Entry deleted"
       );
-
     }
-
   }
 );
 
 
-
-function startEditing(
-  id
-) {
+function startEditing(id) {
 
   const entry =
     entries.find(
-      (
-        item
-      ) =>
-        item.id ===
-        id
+      e => e.id === id
     );
 
 
-  if (!entry) {
-    return;
+  if(!entry) return;
+
+
+  editingId = id;
+  activeType = entry.type;
+
+
+  if(entry.type === "meal") {
+
+    currentMealPhoto =
+      entry.photo || "";
   }
 
 
-  editingId =
-    id;
-
-
-  activeType =
-    entry.type;
-
-
-  currentMealPhoto =
-    entry.type ===
-      'meal'
-
-      ? (
-          entry.photo ||
-          ''
-        )
-
-      : '';
-
-
-  currentMealPhotoSize =
-    entry.type ===
-      'meal'
-
-      ? (
-          Number(
-            entry.photoBytes
-          ) ||
-          0
-        )
-
-      : 0;
-
-
   document.querySelectorAll(
-    '.type-tab'
+    ".type-tab"
   ).forEach(
-    (
-      tab
-    ) => {
+    tab => {
 
       tab.classList.toggle(
-        'active',
-        tab.dataset.type ===
-        activeType
+        "active",
+        tab.dataset.type === activeType
       );
-
     }
   );
 
@@ -2460,200 +1459,823 @@ function startEditing(
 
 
   const form =
-    document.querySelector(
-      '#logForm'
+    document.getElementById(
+      "logForm"
     );
 
 
-  Object.entries(
-    entry
-  ).forEach(
-    ([
-      key,
-      value
-    ]) => {
+  Object.entries(entry)
+    .forEach(
+      ([key,value]) => {
 
-      if (
-        key ===
-        'medWeekDays'
-      ) {
-        return;
-      }
+        if(
+          key === "medWeekDays" ||
+          key === "photo"
+        ) return;
 
 
-      if (
-        key ===
-        'photo' ||
-        key ===
-        'photoBytes'
-      ) {
-        return;
-      }
-
-
-      const control =
-        form.elements
-          .namedItem(
+        const control =
+          form.elements.namedItem(
             key
           );
 
 
-      if (
-        !control ||
-        value == null
-      ) {
-        return;
+        if(control && value != null) {
+
+          control.value = value;
+        }
       }
+    );
 
 
-      control.value =
-        value;
-
-    }
-  );
-
-
-  if (
-    entry.type ===
-    'medication'
+  if(
+    entry.type === "medication" &&
+    Array.isArray(entry.medWeekDays)
   ) {
 
-    const select =
-      document.querySelector(
-        '#medicationSelect'
-      );
+    document.querySelectorAll(
+      'input[name="medWeekDays"]'
+    ).forEach(
+      checkbox => {
 
-
-    if (
-      entry.medicationKey
-    ) {
-
-      select.value =
-        entry.medicationKey;
-
-
-      select.dispatchEvent(
-        new Event(
-          'change'
-        )
-      );
-
-    }
-
-
-    if (
-      Array.isArray(
-        entry.medWeekDays
-      )
-    ) {
-
-      document.querySelectorAll(
-        'input[name="medWeekDays"]'
-      ).forEach(
-        (
-          checkbox
-        ) => {
-
-          checkbox.checked =
-            entry.medWeekDays
-              .includes(
-                checkbox.value
-              );
-
-        }
-      );
-
-    }
-
+        checkbox.checked =
+          entry.medWeekDays.includes(
+            checkbox.value
+          );
+      }
+    );
   }
 
 
-  if (
-    entry.type ===
-    'meal'
-  ) {
+  if(entry.type === "meal") {
 
     renderMealPhotoPreview();
-
   }
 
 
-  document.querySelector(
-    '#logDate'
+  document.getElementById(
+    "logDate"
   ).value =
     entry.date;
 
 
-  document.querySelector(
-    '#logTime'
+  document.getElementById(
+    "logTime"
   ).value =
     entry.time;
 
 
-  document.querySelector(
-    '.logger-card'
-  ).scrollIntoView(
-    {
-      behavior:
-        'smooth',
-
-      block:
-        'start'
-    }
-  );
-
-
-  showToast(
-    'Editing entry'
-  );
-
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 }
 
 
-
-document.querySelector(
-  '#cancelEdit'
+document.getElementById(
+  "cancelEdit"
 ).addEventListener(
-  'click',
+  "click",
   () => {
 
-    editingId =
-      null;
-
-
-    currentMealPhoto =
-      '';
-
-
-    currentMealPhotoSize =
-      0;
-
+    editingId = null;
+    currentMealPhoto = "";
 
     updateForm();
-
   }
 );
 
 
+/* =========================
+   CSV BACKUP
+========================= */
 
-function showToast(
-  message
+
+function csvEscape(value) {
+
+  const text =
+    String(value ?? "");
+
+  const escaped =
+    text.replaceAll(
+      '"',
+      '""'
+    );
+
+
+  if(
+    escaped.includes(",") ||
+    escaped.includes('"') ||
+    escaped.includes("\n")
+  ) {
+
+    return `"${escaped}"`;
+  }
+
+
+  return escaped;
+}
+
+
+function exportCSV() {
+
+  if(!entries.length) {
+
+    alert(
+      "No records to export."
+    );
+
+    return;
+  }
+
+
+  const headers = [
+
+    "ID",
+    "Type",
+    "Date",
+    "Time",
+
+    "Glucose",
+    "Glucose Timing",
+
+    "Food",
+    "Meal Type",
+
+    "Systolic",
+    "Diastolic",
+    "Pulse",
+
+    "Medication Key",
+    "Medication Name",
+    "Dose",
+    "Medication Status",
+    "Medication Timing",
+    "Medication Reason",
+    "Medication Schedule",
+    "Medication Week Days",
+    "Medication Remarks",
+
+    "Created At"
+  ];
+
+
+  const rows =
+    entries.map(
+      entry => [
+
+        csvEscape(entry.id),
+
+        csvEscape(entry.type),
+
+        csvEscape(entry.date),
+
+        csvEscape(entry.time),
+
+        csvEscape(entry.glucose),
+
+        csvEscape(entry.context),
+
+        csvEscape(entry.food),
+
+        csvEscape(entry.mealType),
+
+        csvEscape(entry.systolic),
+
+        csvEscape(entry.diastolic),
+
+        csvEscape(entry.pulse),
+
+        csvEscape(entry.medicationKey),
+
+        csvEscape(entry.medicationName),
+
+        csvEscape(entry.dose),
+
+        csvEscape(entry.medStatus),
+
+        csvEscape(entry.medTiming),
+
+        csvEscape(entry.medReason),
+
+        csvEscape(entry.medSchedule),
+
+        csvEscape(
+          Array.isArray(
+            entry.medWeekDays
+          )
+            ? entry.medWeekDays.join("|")
+            : ""
+        ),
+
+        csvEscape(entry.medRemarks),
+
+        csvEscape(entry.createdAt)
+      ]
+    );
+
+
+  const csv =
+    [
+      headers.join(","),
+      ...rows.map(
+        row => row.join(",")
+      )
+    ].join("\n");
+
+
+  const blob =
+    new Blob(
+      [csv],
+      {
+        type:
+          "text/csv;charset=utf-8"
+      }
+    );
+
+
+  downloadBlob(
+    blob,
+    `HealthLogBackup_${fileDate()}.csv`
+  );
+}
+
+
+function parseCSV(text) {
+
+  const rows = [];
+
+  let row = [];
+  let value = "";
+  let quoted = false;
+
+
+  for(
+    let i = 0;
+    i < text.length;
+    i++
+  ) {
+
+    const char =
+      text[i];
+
+    const next =
+      text[i + 1];
+
+
+    if(
+      char === '"' &&
+      quoted &&
+      next === '"'
+    ) {
+
+      value += '"';
+      i++;
+
+    } else if(
+      char === '"'
+    ) {
+
+      quoted =
+        !quoted;
+
+    } else if(
+      char === "," &&
+      !quoted
+    ) {
+
+      row.push(value);
+      value = "";
+
+    } else if(
+      (
+        char === "\n" ||
+        char === "\r"
+      ) &&
+      !quoted
+    ) {
+
+      if(
+        char === "\r" &&
+        next === "\n"
+      ) {
+
+        i++;
+      }
+
+
+      row.push(value);
+
+      rows.push(row);
+
+      row = [];
+      value = "";
+
+    } else {
+
+      value += char;
+    }
+  }
+
+
+  if(
+    value !== "" ||
+    row.length
+  ) {
+
+    row.push(value);
+
+    rows.push(row);
+  }
+
+
+  return rows;
+}
+
+
+function importCSVBackup() {
+
+  const input =
+    document.getElementById(
+      "importCSVInput"
+    );
+
+
+  const file =
+    input.files[0];
+
+
+  if(!file) return;
+
+
+  if(
+    !confirm(
+      "Import CSV backup? This will replace all current HealthLog records. Meal photos cannot be restored from CSV."
+    )
+  ) {
+
+    input.value = "";
+    return;
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    event => {
+
+      try {
+
+        const rows =
+          parseCSV(
+            event.target.result
+          );
+
+
+        if(rows.length < 2) {
+
+          alert(
+            "CSV backup is empty or invalid."
+          );
+
+          return;
+        }
+
+
+        const headers =
+          rows[0].map(
+            x =>
+              x.trim()
+                .toLowerCase()
+          );
+
+
+        const imported = [];
+
+
+        for(
+          let i = 1;
+          i < rows.length;
+          i++
+        ) {
+
+          const row =
+            rows[i];
+
+
+          if(
+            !row ||
+            row.every(
+              x =>
+                String(x)
+                  .trim() === ""
+            )
+          ) {
+
+            continue;
+          }
+
+
+          const get =
+            name => {
+
+              const index =
+                headers.indexOf(
+                  name.toLowerCase()
+                );
+
+
+              return index >= 0
+                ? row[index] || ""
+                : "";
+            };
+
+
+          const type =
+            get("Type");
+
+
+          if(!type) continue;
+
+
+          imported.push({
+
+            id:
+              get("ID") ||
+              crypto.randomUUID(),
+
+            type,
+
+            date:
+              get("Date"),
+
+            time:
+              get("Time"),
+
+            glucose:
+              get("Glucose"),
+
+            context:
+              get("Glucose Timing"),
+
+            food:
+              get("Food"),
+
+            mealType:
+              get("Meal Type"),
+
+            photo:"",
+
+            systolic:
+              get("Systolic"),
+
+            diastolic:
+              get("Diastolic"),
+
+            pulse:
+              get("Pulse"),
+
+            medicationKey:
+              get("Medication Key"),
+
+            medicationName:
+              get("Medication Name"),
+
+            dose:
+              get("Dose"),
+
+            medStatus:
+              get("Medication Status"),
+
+            medTiming:
+              get("Medication Timing"),
+
+            medReason:
+              get("Medication Reason"),
+
+            medSchedule:
+              get("Medication Schedule"),
+
+            medWeekDays:
+              get(
+                "Medication Week Days"
+              )
+                ? get(
+                    "Medication Week Days"
+                  ).split("|")
+                : [],
+
+            medRemarks:
+              get(
+                "Medication Remarks"
+              ),
+
+            createdAt:
+              get("Created At") ||
+              new Date().toISOString()
+          });
+        }
+
+
+        if(!imported.length) {
+
+          alert(
+            "No valid records found."
+          );
+
+          return;
+        }
+
+
+        entries =
+          imported;
+
+
+        persist();
+        renderTimeline();
+
+
+        alert(
+          `${imported.length} HealthLog records restored from CSV.`
+        );
+
+      } catch(error) {
+
+        console.error(error);
+
+        alert(
+          "Failed to import CSV backup."
+        );
+
+      } finally {
+
+        input.value = "";
+      }
+    };
+
+
+  reader.readAsText(file);
+}
+
+
+/* =========================
+   JSON FULL BACKUP
+========================= */
+
+
+function exportFullBackup() {
+
+  if(!entries.length) {
+
+    alert(
+      "No records to export."
+    );
+
+    return;
+  }
+
+
+  const backup = {
+
+    appName:
+      "HealthLog",
+
+    version:
+      "1.0",
+
+    exportedAt:
+      new Date()
+        .toISOString(),
+
+    recordCount:
+      entries.length,
+
+    records:
+      entries
+  };
+
+
+  const json =
+    JSON.stringify(
+      backup,
+      null,
+      2
+    );
+
+
+  const blob =
+    new Blob(
+      [json],
+      {
+        type:
+          "application/json;charset=utf-8"
+      }
+    );
+
+
+  downloadBlob(
+    blob,
+    `HealthLogFullBackup_${fileDate()}.json`
+  );
+}
+
+
+function importFullBackup() {
+
+  const input =
+    document.getElementById(
+      "importJSONInput"
+    );
+
+
+  const file =
+    input.files[0];
+
+
+  if(!file) return;
+
+
+  if(
+    !confirm(
+      "Import full HealthLog backup? This will replace all current records in this browser."
+    )
+  ) {
+
+    input.value = "";
+    return;
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    event => {
+
+      try {
+
+        const backup =
+          JSON.parse(
+            event.target.result
+          );
+
+
+        if(
+          !backup.records ||
+          !Array.isArray(
+            backup.records
+          )
+        ) {
+
+          alert(
+            "Invalid HealthLog backup file."
+          );
+
+          return;
+        }
+
+
+        entries =
+          backup.records;
+
+
+        persist();
+
+        renderTimeline();
+
+
+        alert(
+          `Full backup restored successfully. ${entries.length} records restored including available meal photos.`
+        );
+
+      } catch(error) {
+
+        console.error(error);
+
+        alert(
+          "Failed to import full backup."
+        );
+
+      } finally {
+
+        input.value = "";
+      }
+    };
+
+
+  reader.readAsText(file);
+}
+
+
+function fileDate() {
+
+  return new Date()
+    .toISOString()
+    .slice(0,19)
+    .replaceAll(
+      ":",
+      "-"
+    );
+}
+
+
+function downloadBlob(
+  blob,
+  filename
 ) {
 
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href =
+    url;
+
+  link.download =
+    filename;
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+  link.remove();
+
+
+  setTimeout(
+    () =>
+      URL.revokeObjectURL(
+        url
+      ),
+    1000
+  );
+}
+
+
+/* BACKUP BUTTONS */
+
+document.getElementById(
+  "exportCSVBtn"
+).addEventListener(
+  "click",
+  exportCSV
+);
+
+
+document.getElementById(
+  "importCSVInput"
+).addEventListener(
+  "change",
+  importCSVBackup
+);
+
+
+document.getElementById(
+  "exportJSONBtn"
+).addEventListener(
+  "click",
+  exportFullBackup
+);
+
+
+document.getElementById(
+  "importJSONInput"
+).addEventListener(
+  "change",
+  importFullBackup
+);
+
+
+function showToast(message) {
+
   const toast =
-    document.querySelector(
-      '#toast'
+    document.getElementById(
+      "toast"
     );
 
 
   toast.querySelector(
-    'span'
+    "span"
   ).textContent =
     message;
 
 
   toast.classList.add(
-    'show'
+    "show"
   );
 
 
@@ -2667,17 +2289,15 @@ function showToast(
       () => {
 
         toast.classList.remove(
-          'show'
+          "show"
         );
 
       },
       2200
     );
-
 }
 
 
-
 updateForm();
-
 renderTimeline();
+updateBackupCount();
