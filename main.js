@@ -129,34 +129,63 @@ const fieldsByType = {
   `,
 
   meal: () => `
-    <label class="field">
-      <span>What did you eat?</span>
-      <textarea
-        name="food"
-        rows="3"
-        placeholder="e.g. Grilled chicken, vegetables and rice"
-        required
-      ></textarea>
-    </label>
+  <label class="field">
+    <span>What did you eat?</span>
+    <textarea
+      name="food"
+      rows="3"
+      placeholder="e.g. Grilled chicken, vegetables and rice"
+      required
+    ></textarea>
+  </label>
 
-    <div class="meal-chips">
-      ${['Breakfast', 'Lunch', 'Dinner', 'Snack']
-        .map(
-          (meal, index) => `
-            <label>
-              <input
-                type="radio"
-                name="mealType"
-                value="${meal}"
-                ${index === 0 ? 'checked' : ''}
-              />
-              <span>${meal}</span>
-            </label>
-          `
-        )
-        .join('')}
+  <div class="meal-chips">
+    ${['Breakfast', 'Lunch', 'Dinner', 'Snack']
+      .map(
+        (meal, index) => `
+          <label>
+            <input
+              type="radio"
+              name="mealType"
+              value="${meal}"
+              ${index === 0 ? 'checked' : ''}
+            />
+            <span>${meal}</span>
+          </label>
+        `
+      )
+      .join('')}
+  </div>
+
+  <div class="food-photo-section">
+    <span class="food-photo-title">Meal photo</span>
+
+    <div class="food-photo-actions">
+      <label class="photo-btn">
+        📷 Take Photo
+        <input
+          id="mealCamera"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+        />
+      </label>
+
+      <label class="photo-btn">
+        🖼 Choose from Library
+        <input
+          id="mealLibrary"
+          type="file"
+          accept="image/*"
+          hidden
+        />
+      </label>
     </div>
-  `,
+
+    <div id="mealPhotoPreview" class="meal-photo-preview"></div>
+  </div>
+`,
 
   medication: () => `
     <label class="field">
