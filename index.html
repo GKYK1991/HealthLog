@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
 
@@ -13,7 +12,7 @@
 
   <meta
     name="description"
-    content="HealthLog — a simple personal health tracker."
+    content="HealthLog — personal glucose, food, blood pressure and medication tracker."
   >
 
   <title>HealthLog</title>
@@ -24,11 +23,10 @@
 <body>
 
   <header class="topbar">
-
     <div class="brand">
       <div class="brand-mark">♥</div>
 
-      <div class="brand-text">
+      <div>
         <strong>HealthLog</strong>
         <small>Personal health tracker</small>
       </div>
@@ -38,14 +36,12 @@
       <span class="status-dot"></span>
       Stored on this device
     </div>
-
   </header>
 
 
   <main>
 
     <section class="hero">
-
       <div>
         <p class="eyebrow">YOUR DAILY HEALTH LOG</p>
 
@@ -55,11 +51,10 @@
         </h1>
 
         <p class="hero-copy">
-          Keep blood glucose, meals, blood pressure and medication
-          together in one simple place.
+          Keep glucose, food, medication and blood pressure together
+          in one simple place.
         </p>
       </div>
-
 
       <div class="date-card">
         <span>Today</span>
@@ -72,7 +67,6 @@
           0 entries logged
         </small>
       </div>
-
     </section>
 
 
@@ -81,15 +75,10 @@
       <div class="logger-card">
 
         <div class="section-heading">
-
           <div>
             <p class="eyebrow">QUICK ENTRY</p>
-
-            <h2>
-              What would you like to log?
-            </h2>
+            <h2>What would you like to log?</h2>
           </div>
-
         </div>
 
 
@@ -219,7 +208,6 @@
 
           <div>
             <p class="eyebrow">HISTORY</p>
-
             <h2>Your timeline</h2>
           </div>
 
@@ -232,16 +220,113 @@
 
         </div>
 
-
         <div
           class="summary-grid"
           id="summaryGrid"
         ></div>
 
-
         <div id="timeline"></div>
 
       </aside>
+
+    </section>
+
+
+    <section class="backup-card">
+
+      <div class="backup-heading">
+
+        <div>
+          <p class="eyebrow">BACKUP & RESTORE</p>
+          <h2>Protect your HealthLog data</h2>
+
+          <p class="backup-copy">
+            CSV is useful for Excel and reporting.
+            Full JSON backup restores all records including meal photos.
+          </p>
+        </div>
+
+        <div class="backup-status">
+          <strong id="backupRecordCount">0</strong>
+          <small>records stored</small>
+        </div>
+
+      </div>
+
+
+      <div class="backup-grid">
+
+        <div class="backup-option">
+          <div class="backup-icon">📄</div>
+
+          <div>
+            <h3>CSV Backup</h3>
+            <p>
+              Export health records for Excel or Google Sheets.
+              Meal photos are not included.
+            </p>
+          </div>
+
+          <div class="backup-buttons">
+            <button
+              id="exportCSVBtn"
+              class="backup-btn"
+              type="button"
+            >
+              Export CSV
+            </button>
+
+            <label class="backup-btn secondary">
+              Import CSV
+
+              <input
+                id="importCSVInput"
+                type="file"
+                accept=".csv,text/csv"
+                hidden
+              >
+            </label>
+          </div>
+        </div>
+
+
+        <div class="backup-option full-backup">
+          <div class="backup-icon">☁️</div>
+
+          <div>
+            <h3>Full Backup</h3>
+
+            <p>
+              Complete backup containing glucose, meals,
+              medication, blood pressure and meal photos.
+            </p>
+          </div>
+
+          <div class="backup-buttons">
+
+            <button
+              id="exportJSONBtn"
+              class="backup-btn"
+              type="button"
+            >
+              Export Full Backup
+            </button>
+
+            <label class="backup-btn secondary">
+              Import Full Backup
+
+              <input
+                id="importJSONInput"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              >
+            </label>
+
+          </div>
+        </div>
+
+      </div>
 
     </section>
 
@@ -259,5 +344,4 @@
   <script src="./main.js"></script>
 
 </body>
-
 </html>
