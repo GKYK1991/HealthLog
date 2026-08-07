@@ -7,9 +7,9 @@
   --green-dark:#174d3e;
   --green-soft:#e9f1eb;
   --line:#e1e5de;
-  --blue-soft:#eef4ff;
   --food-soft:#fbf5ef;
   --pressure-soft:#fbefec;
+  --blue-soft:#eef4ff;
   --shadow:0 18px 60px rgba(33,52,43,.08);
 
   font-family:
@@ -28,16 +28,16 @@
   box-sizing:border-box;
 }
 
-html {
-  -webkit-text-size-adjust:100%;
-}
-
 body {
   margin:0;
   min-width:320px;
 
   background:
-    radial-gradient(circle at 75% 5%,#e6eee5 0,transparent 30%),
+    radial-gradient(
+      circle at 75% 5%,
+      #e6eee5 0,
+      transparent 30%
+    ),
     var(--paper);
 }
 
@@ -67,7 +67,6 @@ button {
   background:rgba(245,246,241,.9);
 
   backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
 
   position:sticky;
   top:0;
@@ -135,14 +134,18 @@ button {
 main {
   max-width:1180px;
   margin:auto;
+
   padding:56px 24px 44px;
 }
 
 .hero {
   display:grid;
   grid-template-columns:1fr auto;
+
   gap:40px;
+
   align-items:end;
+
   margin-bottom:36px;
 }
 
@@ -153,6 +156,7 @@ main {
 
   font-size:11px;
   font-weight:800;
+
   letter-spacing:.16em;
 }
 
@@ -160,6 +164,7 @@ main {
   margin:0;
 
   font-size:clamp(46px,6vw,70px);
+
   line-height:.98;
   letter-spacing:-.04em;
 }
@@ -221,7 +226,6 @@ main {
     minmax(340px,.95fr);
 
   gap:24px;
-
   align-items:start;
 }
 
@@ -265,7 +269,10 @@ main {
 
 .type-tabs {
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+
+  grid-template-columns:
+    repeat(4,minmax(0,1fr));
+
   gap:9px;
 
   margin-bottom:24px;
@@ -287,12 +294,7 @@ main {
 
   text-align:left;
 
-  transition:.18s ease;
-}
-
-.type-tab:hover {
-  border-color:#a7b9af;
-  transform:translateY(-1px);
+  transition:.18s;
 }
 
 .type-tab.active {
@@ -313,16 +315,14 @@ main {
 
 .type-tab b {
   font-size:12px;
-  line-height:1.15;
 }
 
 .type-tab small {
-  color:#8b928f;
   font-size:9px;
+  color:#8b928f;
 }
 
 .tab-icon {
-  flex:0 0 auto;
   font-size:20px;
 }
 
@@ -359,8 +359,6 @@ main {
   background:#fbfcfa;
 
   outline:none;
-
-  transition:.18s ease;
 }
 
 .field input,
@@ -371,7 +369,9 @@ main {
 
 .field textarea {
   min-height:92px;
+
   padding:13px;
+
   resize:vertical;
 }
 
@@ -395,7 +395,10 @@ main {
 
 .common-fields {
   display:grid;
-  grid-template-columns:1fr 1fr;
+
+  grid-template-columns:
+    1fr 1fr;
+
   gap:12px;
 
   padding-top:17px;
@@ -417,9 +420,6 @@ main {
   color:white;
 
   font-weight:800;
-
-  box-shadow:
-    0 9px 22px rgba(30,93,75,.18);
 }
 
 .primary-btn:hover {
@@ -446,6 +446,9 @@ main {
 .cancel-btn.show {
   display:block;
 }
+
+
+/* MEAL */
 
 .meal-chips {
   display:flex;
@@ -474,17 +477,13 @@ main {
 
   font-size:11px;
   font-weight:700;
-
-  cursor:pointer;
 }
 
 .meal-chips input:checked + span {
   background:var(--green);
-  border-color:var(--green);
   color:white;
+  border-color:var(--green);
 }
-
-/* MEAL PHOTO */
 
 .food-photo-section {
   margin:10px 0 18px;
@@ -514,7 +513,7 @@ main {
 .photo-btn {
   min-height:46px;
 
-  padding:9px 10px;
+  padding:9px;
 
   display:flex;
   align-items:center;
@@ -524,19 +523,14 @@ main {
   border-radius:12px;
 
   background:white;
-
   color:#40534c;
+
+  text-align:center;
 
   font-size:11px;
   font-weight:700;
 
-  text-align:center;
   cursor:pointer;
-}
-
-.photo-btn:hover {
-  border-color:var(--green);
-  color:var(--green);
 }
 
 .photo-note {
@@ -547,7 +541,6 @@ main {
   color:#8a918e;
 
   font-size:9px;
-  line-height:1.4;
 }
 
 .meal-photo-preview {
@@ -586,14 +579,15 @@ main {
   max-width:250px;
   max-height:170px;
 
-  margin-top:8px;
-
   display:block;
 
-  object-fit:cover;
+  margin-top:8px;
 
   border-radius:12px;
+
+  object-fit:cover;
 }
+
 
 /* MEDICATION */
 
@@ -631,7 +625,10 @@ main {
 
 .weekly-days {
   display:grid;
-  grid-template-columns:repeat(7,minmax(0,1fr));
+
+  grid-template-columns:
+    repeat(7,minmax(0,1fr));
+
   gap:6px;
 }
 
@@ -655,22 +652,22 @@ main {
 
   background:white;
 
-  color:#6d7772;
-
   font-size:10px;
   font-weight:800;
 }
 
 .weekly-day.expected span {
-  border-color:#8db6a3;
   background:#eef7f2;
   color:var(--green);
+
+  border-color:#8db6a3;
 }
 
 .weekly-day input:checked + span {
-  border-color:var(--green);
   background:var(--green);
   color:white;
+
+  border-color:var(--green);
 }
 
 .weekly-hint {
@@ -684,11 +681,15 @@ main {
   line-height:1.4;
 }
 
+
 /* SUMMARY */
 
 .summary-grid {
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
   gap:8px;
 
   margin-bottom:18px;
@@ -721,7 +722,6 @@ main {
   font-weight:800;
 
   text-transform:uppercase;
-  letter-spacing:.05em;
 }
 
 .summary-item strong {
@@ -732,7 +732,6 @@ main {
   margin-top:3px;
 
   font-size:9px;
-  line-height:1.45;
 }
 
 .summary-item.full {
@@ -754,6 +753,7 @@ main {
 .summary-item.medication {
   background:var(--blue-soft);
 }
+
 
 /* TIMELINE */
 
@@ -790,7 +790,6 @@ main {
   color:#9aa09d;
 
   font-size:8px;
-  font-weight:500;
 }
 
 .item-icon {
@@ -819,17 +818,11 @@ main {
   background:#eef4ff;
 }
 
-.item-body {
-  min-width:0;
-}
-
 .item-body b {
   display:block;
 
   font-size:13px;
   line-height:1.35;
-
-  overflow-wrap:anywhere;
 }
 
 .item-body span {
@@ -840,7 +833,6 @@ main {
   color:#949b98;
 
   font-size:10px;
-  line-height:1.35;
 }
 
 .item-actions {
@@ -850,36 +842,24 @@ main {
 
 .edit-btn,
 .delete-btn {
-  padding:6px;
-
   border:0;
   border-radius:8px;
+
+  padding:6px;
 
   background:transparent;
 }
 
-.edit-btn:hover,
-.delete-btn:hover {
-  background:#edf2ec;
-}
-
 .empty-state {
-  text-align:center;
   padding:58px 18px 24px;
-}
 
-.empty-state h3 {
-  margin:0 0 6px;
+  text-align:center;
 }
 
 .empty-state p {
-  max-width:230px;
-  margin:auto;
-
   color:#8a918e;
 
   font-size:12px;
-  line-height:1.5;
 }
 
 .count-badge {
@@ -888,7 +868,6 @@ main {
   border-radius:30px;
 
   background:#edf2ec;
-
   color:var(--green);
 
   font-size:11px;
@@ -905,12 +884,12 @@ main {
   border-radius:12px;
 
   background:#f7faf7;
-
   color:var(--green);
 
   font-size:11px;
   font-weight:800;
 }
+
 
 /* BACKUP */
 
@@ -939,11 +918,11 @@ main {
 }
 
 .backup-status {
-  min-width:100px;
-
-  text-align:center;
+  min-width:110px;
 
   padding:12px;
+
+  text-align:center;
 
   border-radius:14px;
 
@@ -957,12 +936,15 @@ main {
 
 .backup-status strong {
   color:var(--green);
+
   font-size:22px;
 }
 
 .backup-status small {
   margin-top:3px;
+
   color:var(--muted);
+
   font-size:9px;
 }
 
@@ -991,13 +973,12 @@ main {
 
 .backup-option h3 {
   margin:8px 0 5px;
-  font-size:15px;
 }
 
 .backup-option p {
-  min-height:42px;
-
   margin:0;
+
+  min-height:44px;
 
   color:var(--muted);
 
@@ -1014,23 +995,25 @@ main {
 }
 
 .backup-btn {
-  min-height:40px;
+  min-height:42px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:8px;
 
   border:0;
   border-radius:11px;
 
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
   background:var(--green);
-
   color:white;
 
   font-size:10px;
   font-weight:800;
 
   text-align:center;
+
   cursor:pointer;
 }
 
@@ -1038,9 +1021,18 @@ main {
   border:1px solid #d5ddd7;
 
   background:white;
-
   color:var(--green);
 }
+
+.backup-note {
+  margin:14px 0 0;
+
+  color:var(--muted);
+
+  font-size:10px;
+  line-height:1.5;
+}
+
 
 /* TOAST */
 
@@ -1059,7 +1051,6 @@ main {
   border-radius:30px;
 
   background:#172d27;
-
   color:white;
 
   font-size:12px;
@@ -1074,8 +1065,10 @@ main {
 
 .toast.show {
   opacity:1;
+
   transform:translate(-50%,0);
 }
+
 
 @media(max-width:900px) {
 
@@ -1091,6 +1084,7 @@ main {
     width:100%;
   }
 }
+
 
 @media(max-width:620px) {
 
@@ -1120,7 +1114,9 @@ main {
   }
 
   .type-tabs {
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:
+      repeat(4,minmax(0,1fr));
+
     gap:5px;
   }
 
@@ -1150,12 +1146,9 @@ main {
     gap:8px;
   }
 
-  .food-photo-actions {
-    grid-template-columns:1fr 1fr;
-  }
-
   .weekly-days {
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:
+      repeat(4,minmax(0,1fr));
   }
 
   .timeline-item {
