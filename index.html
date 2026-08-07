@@ -1,19 +1,34 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
   <meta name="theme-color" content="#f5f6f1">
-  <meta name="description" content="HealthLog — a simple personal health tracker.">
+
+  <meta
+    name="description"
+    content="HealthLog — a simple personal health tracker."
+  >
+
   <title>HealthLog</title>
+
   <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
+
   <header class="topbar">
+
     <div class="brand">
       <div class="brand-mark">♥</div>
-      <div>
+
+      <div class="brand-text">
         <strong>HealthLog</strong>
         <small>Personal health tracker</small>
       </div>
@@ -23,116 +38,226 @@
       <span class="status-dot"></span>
       Stored on this device
     </div>
+
   </header>
 
+
   <main>
+
     <section class="hero">
+
       <div>
         <p class="eyebrow">YOUR DAILY HEALTH LOG</p>
-        <h1>Track your health.<br><em>One log at a time.</em></h1>
+
+        <h1>
+          Track your health.<br>
+          <em>One log at a time.</em>
+        </h1>
+
         <p class="hero-copy">
-          Keep blood glucose, meals, blood pressure and medication together in one simple place.
+          Keep blood glucose, meals, blood pressure and medication
+          together in one simple place.
         </p>
       </div>
 
+
       <div class="date-card">
         <span>Today</span>
+
         <strong id="todayDate">—</strong>
+
         <div class="tiny-rule"></div>
-        <small id="todayCount">0 entries logged</small>
+
+        <small id="todayCount">
+          0 entries logged
+        </small>
       </div>
+
     </section>
 
+
     <section class="workspace">
+
       <div class="logger-card">
+
         <div class="section-heading">
+
           <div>
             <p class="eyebrow">QUICK ENTRY</p>
-            <h2>What would you like to log?</h2>
+
+            <h2>
+              What would you like to log?
+            </h2>
           </div>
+
         </div>
 
+
         <div class="type-tabs">
-          <button class="type-tab active" data-type="glucose">
-            <span class="tab-icon">◉</span>
+
+          <button
+            class="type-tab active"
+            data-type="glucose"
+            type="button"
+          >
+            <span class="tab-icon glucose-icon">●</span>
+
             <span>
               <b>Blood glucose</b>
               <small>mmol/L</small>
             </span>
           </button>
 
-          <button class="type-tab" data-type="meal">
+
+          <button
+            class="type-tab"
+            data-type="meal"
+            type="button"
+          >
             <span class="tab-icon">🍽</span>
+
             <span>
               <b>Food & meal</b>
-              <small>What you ate</small>
+              <small>Food + photo</small>
             </span>
           </button>
 
-          <button class="type-tab" data-type="medication">
+
+          <button
+            class="type-tab"
+            data-type="medication"
+            type="button"
+          >
             <span class="tab-icon">💊</span>
+
             <span>
               <b>Medication</b>
-              <small>Dose & weekly check</small>
+              <small>Weekly check</small>
             </span>
           </button>
 
-          <button class="type-tab" data-type="pressure">
-            <span class="tab-icon">♥</span>
+
+          <button
+            class="type-tab"
+            data-type="pressure"
+            type="button"
+          >
+            <span class="tab-icon heart-icon">♥</span>
+
             <span>
               <b>Blood pressure</b>
               <small>mmHg</small>
             </span>
           </button>
+
         </div>
 
+
         <form id="logForm">
+
           <div id="dynamicFields"></div>
 
+
           <div class="common-fields">
+
             <label class="field">
               <span>Time</span>
-              <input id="logTime" name="time" type="time" required>
+
+              <input
+                id="logTime"
+                name="time"
+                type="time"
+                required
+              >
             </label>
+
 
             <label class="field">
               <span>Date</span>
-              <input id="logDate" name="date" type="date" required>
+
+              <input
+                id="logDate"
+                name="date"
+                type="date"
+                required
+              >
             </label>
+
           </div>
+
 
           <div class="form-actions">
-            <button class="primary-btn" type="submit">
-              <span id="submitLabel">Log blood glucose</span>
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              <span id="submitLabel">
+                Log blood glucose
+              </span>
             </button>
 
-            <button class="cancel-btn" id="cancelEdit" type="button">
+
+            <button
+              class="cancel-btn"
+              id="cancelEdit"
+              type="button"
+            >
               Cancel editing
             </button>
+
           </div>
+
         </form>
+
       </div>
 
+
       <aside class="today-card">
+
         <div class="section-heading compact">
+
           <div>
             <p class="eyebrow">HISTORY</p>
+
             <h2>Your timeline</h2>
           </div>
 
-          <span class="count-badge" id="entryBadge">0</span>
+          <span
+            class="count-badge"
+            id="entryBadge"
+          >
+            0
+          </span>
+
         </div>
 
-        <div class="summary-grid" id="summaryGrid"></div>
+
+        <div
+          class="summary-grid"
+          id="summaryGrid"
+        ></div>
+
+
         <div id="timeline"></div>
+
       </aside>
+
     </section>
+
   </main>
 
-  <div class="toast" id="toast">
+
+  <div
+    class="toast"
+    id="toast"
+  >
     <span>Entry saved</span>
   </div>
 
+
   <script src="./main.js"></script>
+
 </body>
+
 </html>
